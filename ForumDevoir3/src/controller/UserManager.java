@@ -48,7 +48,7 @@ public class UserManager extends HttpServlet {
         HttpSession session = request.getSession();
         if (session.getAttribute("login") == null || !"admin".equalsIgnoreCase((String) session.getAttribute("role"))) {
             try (PrintWriter out = response.getWriter()) {
-                /* TODO output your page here. You may use following sample code. */
+            	
                 out.println("<!DOCTYPE html>");
                 out.println("<html>");
                 out.println("<head>");
@@ -112,27 +112,15 @@ public class UserManager extends HttpServlet {
         response.setContentType("text/html;charset=UTF-8");
         HttpSession session = request.getSession();
         if (session.getAttribute("login") == null || "admin".equalsIgnoreCase((String) session.getAttribute("role")) == false) {
-            try (PrintWriter out = response.getWriter()) {
-                
-                out.println("<!DOCTYPE html>");
-                out.println("<html>");
-                out.println("<head>");
-                out.println("<meta http-equiv='refresh' content='5; URL=connexion.html' />");
-                out.println("<title> Non autorisé</title>");
-                out.println("</head>");
-                out.println("<body>");
-                out.println("<h1>Vous n'êtes pas connecté ou vous n'êtes pas admin => redirigé vers la page connexion </h1>");
-                out.println("</body>");
-                out.println("</html>");
-            }
-
+        	RequestDispatcher rd = request.getRequestDispatcher("Deconnexion");
+        	rd.forward(request, response);
         } else {
             try (PrintWriter out = response.getWriter()) {
                
                 out.println("<!DOCTYPE html>");
                 out.println("<html>");
                 out.println("<head>");
-                out.println("<title>Un nouveau utilisateur </title>");
+                out.println("<title>Creation utilisateur </title>");
                 out.println("</head>");
                 out.println("<body>");
                 out.println("<h1> Liste des utilisateurs : </h1>");

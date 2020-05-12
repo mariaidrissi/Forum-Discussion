@@ -39,22 +39,13 @@ public class Validation extends HttpServlet {
 
         HttpSession session = request.getSession();
         if (session.getAttribute("login") == null || !"admin".equalsIgnoreCase((String) session.getAttribute("role"))) {
-            try (PrintWriter out = response.getWriter()) {
-                /* TODO output your page here. You may use following sample code. */
-                out.println("<!DOCTYPE html>");
-                out.println("<html>");
-                out.println("<head>");
-                out.println("<meta http-equiv='refresh' content='5; URL=connexion.html' />");
-                out.println("<title> Non autorisé</title>");
-                out.println("</head>");
-                out.println("<body>");
-                out.println("<h1>Vous n'êtes pas connecté ou vous n'êtes pas admin => redirigé vers la page connexion </h1>");
-                out.println("</body>");
-                out.println("</html>");
-            }
-
+        	RequestDispatcher rd = request.getRequestDispatcher("Deconnexion");
+        	rd.forward(request, response);
         } else {
             try {
+            	RequestDispatcher rd = request.getRequestDispatcher("UserManager");
+            	PrintWriter out = response.getWriter();
+            	
                 String firstName = request.getParameter("User first name");
                 String lastName = request.getParameter("User familly name");
                 String mail = request.getParameter("User email");
@@ -62,16 +53,13 @@ public class Validation extends HttpServlet {
                 String password = request.getParameter("User password");
                 
                 if (firstName == null || lastName == null || mail == null || password == null) {
-                    System.out.println("Champs non renseignés");
-                    RequestDispatcher rd = request.getRequestDispatcher("NouveauUtilisateur.html");
-                    rd.forward(request, response);
+                    out.println("<p style='color:red;'>Les champs ne peuvent pas etre vides !</p>");
+                    rd.include(request, response);
                     valid = false;
                 } else if ("".equals(firstName) || "".equals(lastName) || "".equals(mail) || "".equals(password)) {
-                    System.out.println("Champs vides");
-                    RequestDispatcher rd = request.getRequestDispatcher("NouveauUtilisateur.html");
-                    rd.forward(request, response);
+                	out.println("<p style='color:red;'>Les champs ne peuvent pas etre vides !</p>");
+                    rd.include(request, response);
                     valid = false;
-                    
                 }
                 
                 if (request.getParameter("validator") != null) {// des doublons ont été détectés et l'utilisateur à valider son choix
@@ -79,40 +67,37 @@ public class Validation extends HttpServlet {
                         valid = true;
                     } else {
                         valid = false;
-                        RequestDispatcher rd = request.getRequestDispatcher("NouveauUtilisateur.html");//abandonner l'insertion
-                        rd.forward(request, response);
+                        rd.forward(request, response); //abandonner insertion
                     }
                     
                 } else if (Utilisateur.FindByLastAndFirstName(firstName,lastName)!=null) {
                     valid = false;
-                    try (PrintWriter out = response.getWriter()) {
-                        /* TODO output your page here. You may use following sample code. */
-                        out.println("<!DOCTYPE html>");
-                        out.println("<html>");
-                        out.println("<head>");
-                        out.println("<title>Servlet Validation</title>");
-                        out.println("</head>");
-                        out.println("<body>");
-                        out.println("<h1>Un utilisateur avec les mêmes nom et prénom existe déjà. Voulez-vous l'enregistrer ?  </h1>");
-                        out.println("<form method='POST' action='Validation'>");
-                        out.println("Oui <input type='radio' name='valider' value='oui' /> ");
-                        out.println("Nom <input type='radio' name='valider' value='nom' />");
-                        out.println("<input type='hidden' name='User first name' value='" + firstName + "'/>");
-                        out.println("<input type='hidden' name='User familly name' value='" + lastName + "'/>");
-                        out.println("<input type='hidden' name='User email' value='" + mail + "'/>");
-                        out.println("<input type='hidden' name='gender' value='" + gender + "'/>");
-                        out.println("<input type='hidden' name='User password' value='" + password + "' />");
-                        out.println("<br>");
-                        out.println("<input type ='submit' value='Envoyer' name='validator' />");
-                        out.println("</form>");
-                        out.println("</body>");
-                        out.println("</html>");
-                    }
-                    
+              
+                    out.println("<!DOCTYPE html>");
+                    out.println("<html>");
+                    out.println("<head>");
+                    out.println("<title>Servlet Validation</title>");
+                    out.println("</head>");
+                    out.println("<body>");
+                    out.println("<h1>Un utilisateur avec les mêmes nom et prénom existe déjà. Voulez-vous l'enregistrer ?  </h1>");
+                    out.println("<form method='POST' action='Validation'>");
+                    out.println("Oui <input type='radio' name='valider' value='oui' /> ");
+                    out.println("Nom <input type='radio' name='valider' value='nom' />");
+                    out.println("<input type='hidden' name='User first name' value='" + firstName + "'/>");
+                    out.println("<input type='hidden' name='User familly name' value='" + lastName + "'/>");
+                    out.println("<input type='hidden' name='User email' value='" + mail + "'/>");
+                    out.println("<input type='hidden' name='gender' value='" + gender + "'/>");
+                    out.println("<input type='hidden' name='User password' value='" + password + "' />");
+                    out.println("<br>");
+                    out.println("<input type ='submit' value='Envoyer' name='validator' />");
+                    out.println("</form>");
+                    out.println("</body>");
+                    out.println("</html>");
                 }
                 if (valid) {
-                    RequestDispatcher rd = request.getRequestDispatcher("UserManager");
-                    rd.forward(request, response);
+                	out.println("<p style='color:green;'>Insertion effectuee.</p>");
+                    rd = request.getRequestDispatcher("UserManager");
+                    rd.include(request, response);
                 }
             } catch (ClassNotFoundException ex) {
                 Logger.getLogger(Validation.class.getName()).log(Level.SEVERE, null, ex);
@@ -123,7 +108,6 @@ public class Validation extends HttpServlet {
         }
     }
 
-    // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
     /**
      * Handles the HTTP <code>GET</code> method.
      *
@@ -160,6 +144,6 @@ public class Validation extends HttpServlet {
     @Override
     public String getServletInfo() {
         return "Short description";
-    }// </editor-fold>
+    }
 
 }

@@ -132,9 +132,10 @@ public class Utilisateur extends ActiveRecordBase {
 
 	    public Utilisateur(ResultSet res) throws SQLException {
 	        this.id = res.getInt("id");
-	        this.firstName = res.getString(2);
-	        this.lastName = res.getString(3);
-	        this.login = res.getString(4);
+	        this.firstName = res.getString("firstname");
+            this.lastName = res.getString("lastname");
+            this.login = res.getString("login");
+            this.pwd=res.getString("pwd");
 	        this.gender = res.getString("gender");
 	        this.role = Role.values()[res.getBoolean("admin") ? 1 : 0];
 	        _builtFromDB = true;
@@ -148,9 +149,10 @@ public class Utilisateur extends ActiveRecordBase {
 	        ResultSet res = sql.executeQuery(select_query);
 	        if (res.next()) {
 	            this.id = res.getInt("id");
-	            this.firstName = res.getString(2);
-	            this.lastName = res.getString(3);
-	            this.login = res.getString(4);
+	            this.firstName = res.getString("firstname");
+	            this.lastName = res.getString("lastname");
+	            this.login = res.getString("login");
+	            this.pwd=res.getString("pwd");
 	            this.gender = res.getString("gender");
 	            this.role = Role.values()[res.getBoolean("admin") ? 1 : 0];
 	            _builtFromDB = true;
@@ -268,6 +270,23 @@ public class Utilisateur extends ActiveRecordBase {
 	    }
 
 	    public static Utilisateur FindByID(int id) {
+	    	Connection conn = JDBCMysql.getConnection();
+	    	ResultSet res = null;
+	        String select_query = "select * from `utilisateur` where `id` = ?;";
+	        try { 
+	        	PreparedStatement sql = null;
+	        
+		        sql = conn.prepareStatement(select_query);
+		        sql.setInt(1, id);
+		        res = sql.executeQuery();
+
+				if (res.next()) {
+					Utilisateur u = new Utilisateur(res);
+				    return u;
+				}
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
 	        return null;
 	    }
 
@@ -301,6 +320,21 @@ public class Utilisateur extends ActiveRecordBase {
 	        return listUser;
 	    }
 	    
+	    public static String FindAlltoString() throws IOException, ClassNotFoundException, SQLException {
+
+	        String contenu = "<ol>";
+	      
+	        ArrayList<Utilisateur> users = Utilisateur.FindAll();
+	        for (int index = 0; index < users.size(); index++) {
+                contenu += "<li>";
+                contenu += users.get(index).toString();
+                contenu += "</li>";
+            }
+
+	        contenu += "</ol>";
+	        return contenu;
+	    }
+	    
 	    
 	    public static Utilisateur FindByLastAndFirstName(String fname, String lname) throws IOException, ClassNotFoundException, SQLException {
 	        Connection conn = JDBCMysql.getConnection();
@@ -313,20 +347,115 @@ public class Utilisateur extends ActiveRecordBase {
 	        if (res.next()) {
 	        	Utilisateur u = new Utilisateur(res);
 	            return u;
-
 	        }
 	        return null;
 	    }
 
-	    public void LoadForumSubscriptions() {
+	    public ArrayList<Forum> LoadForumSubscriptions() {
+	    	ArrayList<Forum> forumSubs = new ArrayList<Forum>();
 
+	    	ResultSet rs = null;
+			PreparedStatement st = null;
+			try {
+			
+				Connection db = JDBCMysql.getConnection();
+				st = db.prepareStatement("SELECT id_forum FROM subscriptions WHERE id_user = ?;");
+				st.setInt(1, id);
+				rs = st.executeQuery();
+				while(rs.next()) {
+					forumSubs.add(new Forum(rs.getInt(1)));
+				}
+			}catch(Exception e) {
+				System.out.println(e);
+			}
+			try {
+				st.close();
+			} catch (SQLException e) {
+				System.out.println(e);
+			}
+	    	
+	    	return forumSubs;
 	    }
 
-	    public void addForumSubscription() {
-
+	    public void addForumSubscription(int id) {
+	    	try {
+				this.forumSubscriptions.add(new Forum(id));
+				Connection db = JDBCMysql.getConnection();
+				String select_query = "insert into subscriptions (id_user, id_forum) values (?,?);";
+		        PreparedStatement sql = null;
+		        sql = db.prepareStatement(select_query);
+		        sql.setInt(1, this.id);
+		        sql.setInt(2, id);
+		        sql.execute();
+				
+			} catch (ClassNotFoundException | SQLException | IOException e) {
+				e.printStackTrace();
+			}	    	
 	    }
 
-	    public void updateForumSubscriptions() {
+	    public void deleteForumSubscription(int id) {
+	    	try {
+				this.forumSubscriptions.removeIf(f -> f.id == id);
+				Connection db = JDBCMysql.getConnection();
+				String select_query = "delete from subscriptions where id_forum=? and id_user=?;";
+		        PreparedStatement sql = null;
+		        sql = db.prepareStatement(select_query);
+		        sql.setInt(1, id);
+		        sql.setInt(2, this.id);
+		        sql.execute();
+				
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+	    }
+	    
 
-	    }	
+	    public String listerForumToString() {
+	    	String contenu="";
+	    	contenu += "<ul>";
+	    	this.forumSubscriptions = LoadForumSubscriptions();
+	    	for (int index = 0; index < this.forumSubscriptions.size(); index++) {
+	    		contenu += "<li>";
+	    		contenu += forumSubscriptions.get(index).toStringListe();
+	    		contenu += "<form action='AfficherForum' method='post'>";
+	    		contenu += "<input type='hidden' name='forum' value='"+forumSubscriptions.get(index).getId()+"'>";
+	    		contenu += "<input type='submit' value='Acceder au forum'>";
+	    		contenu += "</form></li>";
+	    	}
+	    	contenu += "</ul>";
+	    	return contenu;
+	    }
+	    
+	    public String listerForumsNonAbonne() {
+			String contenu= "<dl>";
+			
+			ResultSet rs = null;
+			PreparedStatement st = null;
+			try {
+				Connection db = JDBCMysql.getConnection();
+				st = db.prepareStatement("SELECT f.id, f.titre, f.description, u.firstname, u.lastname FROM forum f LEFT JOIN subscriptions s ON f.id=s.id_forum, utilisateur u WHERE (s.id_user <> ? OR s.id_user IS NULL) and u.id=f.createur ;");
+				st.setInt(1, this.id);
+				rs = st.executeQuery();
+				contenu += "<ul>";
+				while(rs.next()) {
+					contenu += "<li><dt>"+rs.getString(2) +" by "+ rs.getString(4) +" "+rs.getString(5)+"</dt></a>";
+					contenu += "<dd>"+rs.getString(3)+"</dd>";
+					contenu += "<form action='AjouterAbonnementForum' method='post'>";
+		    		contenu += "<input type='hidden' name='forum' value='"+rs.getInt(1)+"'>";
+		    		contenu += "<input type='submit' value=\"S'abonner\">";
+		    		contenu += "</form></li>";
+				}
+				contenu += "</ul>";
+			}catch(Exception e) {
+				System.out.println(e);
+			}
+			try {
+				st.close();
+			} catch (SQLException e) {
+				System.out.println(e);
+			}
+			
+			contenu += "</dl>";
+			return contenu;
+		}
 }

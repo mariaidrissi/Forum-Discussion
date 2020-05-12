@@ -53,6 +53,7 @@ public class Connexion extends HttpServlet {
            
             } else {
                 HttpSession session = request.getSession();
+                session.setAttribute("utilisateur", u);
                 session.setAttribute("login", u.getLogin());
                 String role = u.getRole();
                 session.setAttribute("role", role);

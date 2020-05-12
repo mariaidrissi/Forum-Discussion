@@ -2,11 +2,12 @@ CREATE TABLE utilisateur (id int(11) NOT NULL AUTO_INCREMENT, lastname varchar(2
 
 CREATE TABLE forum (`id` int(11) NOT NULL AUTO_INCREMENT, `titre` varchar(45) NOT NULL DEFAULT 'new forum', `createur` int(11) NOT NULL, PRIMARY KEY(`id`),CONSTRAINT `user_owner` FOREIGN KEY (`createur`) REFERENCES utilisateur(`id`));
 
-CREATE TABLE `message` (`id` int(11) NOT NULL AUTO_INCREMENT,`contenu` MEDIUMTEXT NULL, `owner` int(11) NOT NULL, `forumPub` int(11) NOT NULL, PRIMARY KEY (`id`), CONSTRAINT `FK_editor` FOREIGN KEY (`owner`) REFERENCES `utilisateur`(`id`) ON DELETE NO ACTION ON UPDATE NO ACTION, CONSTRAINT `Fk_dest` FOREIGN KEY (`forumPub`) REFERENCES `forum`(`id`) ON DELETE CASCADE ON UPDATE CASCADE);
+CREATE TABLE `message` (`id` int(11) NOT NULL AUTO_INCREMENT,`contenu` MEDIUMTEXT NULL, `owner` int(11) NOT NULL, `datePub` date NOT NULL, `forumPub` int(11) NOT NULL, PRIMARY KEY (`id`), CONSTRAINT `FK_editor` FOREIGN KEY (`owner`) REFERENCES `utilisateur`(`id`) ON DELETE NO ACTION ON UPDATE NO ACTION, CONSTRAINT `Fk_dest` FOREIGN KEY (`forumPub`) REFERENCES `forum`(`id`) ON DELETE CASCADE ON UPDATE CASCADE);
 
 CREATE TABLE `subscriptions`(`id_user` INT NOT NULL, `id_forum` INT NOT NULL, PRIMARY KEY (`id_user`, `id_forum`), CONSTRAINT `FK_subs_user` FOREIGN KEY (`id_user`) REFERENCES `utilisateur`(`id`) ON DELETE NO ACTION ON UPDATE NO ACTION, CONSTRAINT `FK_subs_forum` FOREIGN KEY (`id_forum`) REFERENCES `forum`(`id`) ON DELETE NO ACTION ON UPDATE NO ACTION);
 
 ALTER TABLE `forum` ADD COLUMN `description` MEDIUMTEXT NULL AFTER `createur`;
+ALTER TABLE `utilisateur` ADD CONSTRAINT `unique_login` UNIQUE(`login`);
 
 insert into utilisateur(lastname,firstname,login,admin,gender,pwd) values ("jolicoeur", "lise", "lise", '1', 'female', "root");
  insert into utilisateur(lastname,firstname,login,admin,gender,pwd) values ("idrissi", "maria", "maria", '0', 'female', "root");

@@ -32,6 +32,7 @@ public class Deconnexion extends HttpServlet {
 	            out.println("</head>");
 	            out.println("<body>");
 	            out.println("<h1>Vous êtes déconnecté et redirigé vers la page connexion </h1>");
+	            out.println("<a href=' connexion.html'> Connexion </a>");
 	            out.println("</body>");
 	            out.println("</html>");
 	        }

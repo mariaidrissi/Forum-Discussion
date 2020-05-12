@@ -19,6 +19,7 @@ public class Forum extends ActiveRecordBase {
 	private Utilisateur createur;
 	
 	public Forum(String titre, String description, Utilisateur u) {
+		this._builtFromDB = false;
         this.messages = new ArrayList<Message>();
         this.titre = titre;
         this.description = description;
@@ -26,7 +27,19 @@ public class Forum extends ActiveRecordBase {
     }
 
     public Forum() {
+    	this._builtFromDB = false;
         this.messages = new ArrayList<Message>();
+    }
+    
+    public Forum(ResultSet rs) {
+    	this._builtFromDB = true;
+    	try {
+			this.titre = rs.getString(1);
+	        this.description = rs.getString(2);
+	        this.createur = Utilisateur.FindByID(rs.getInt(3));
+    	} catch (SQLException e) {
+			e.printStackTrace();
+		}
     }
 
 	
@@ -88,30 +101,83 @@ public class Forum extends ActiveRecordBase {
 
 	@Override
     protected String _delete() {
-        return "DELETE FROM `forum` WHERE (`id` = '" + id + "');";
+        return "DELETE FROM `forum` WHERE (`id` = '" + this.id + "');";
     }
 
     @Override
     protected String _insert() {
         return "INSERT INTO `forum` (`titre`, `createur`,`description`) "
-                + "VALUES ('" + titre + "', '" + createur.getId() + "',`description` = '"+ description +"');";
+                + "VALUES ('" + this.titre + "', '" + this.createur.id + "', '"+this.description +"');";
     }
 
     @Override
     protected String _update() {
-        return "UPDATE `forum` SET `titre` = '" + titre + "', "
-                + "`createur`='" + createur.getId() + "', `description` = '"+description+"'   WHERE (`id` = '" + id + "');";
+        return "UPDATE `forum` SET `titre` = '" + this.titre + "', "
+                + "`createur`='" + this.createur.id + "', `description` = '"+this.description+"'   WHERE (`id` = '" + id + "');";
     }
 
-    public void LoadMessages() {
-
+    public ArrayList<Message> LoadMessages() {
+    	ArrayList<Message> messages = new ArrayList<Message>();
+    	
+		ResultSet rs = null;
+		PreparedStatement st = null;
+		try {
+		
+			Connection db = JDBCMysql.getConnection();
+			st = db.prepareStatement("SELECT contenu, datePub, owner FROM message WHERE forumPub = ?;");
+			st.setInt(1, id);
+			rs = st.executeQuery();
+			while(rs.next()) {
+				messages.add(new Message(rs.getString(1), Utilisateur.FindByID(rs.getInt(3)), rs.getDate(2),this));
+			}
+		}catch(Exception e) {
+			System.out.println(e);
+		}
+		try {
+			st.close();
+		} catch (SQLException e) {
+			System.out.println(e);
+		}
+		return messages;
     }
 
-    public void addMessage() {
-
+    public void addMessage(String contenu, Utilisateur u) {
+    	Message m = new Message();
+    	m.setContenu(contenu);
+    	m.setOwner(u);
+    	m.setForumPub(this);
+    	try {
+			m.save();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
     }
-    public static List<Forum> FindAll() {
-        return null;
+    
+    
+    public static ArrayList<Forum> FindAll() {
+    	ArrayList<Forum> forums = new ArrayList<Forum>();
+    	
+		ResultSet rs = null;
+		PreparedStatement st = null;
+		try {
+		
+			Connection db = JDBCMysql.getConnection();
+			st = db.prepareStatement("SELECT titre, description, createur FROM forum;");
+		
+			rs = st.executeQuery();
+			while(rs.next()) {
+				forums.add(new Forum(rs));
+				
+			}
+		}catch(Exception e) {
+			System.out.println(e);
+		}
+		try {
+			st.close();
+		} catch (SQLException e) {
+			System.out.println(e);
+		}
+		return forums;
     }
 
 	
@@ -143,35 +209,18 @@ public class Forum extends ActiveRecordBase {
 		}
 		return f;
 	}
-	
+	*/
 	public String afficherMessages() {
 		String contenu= "<dl>";
-		
-		ResultSet rs = null;
-		PreparedStatement st = null;
-		try {
-		
-			Connection db = JDBCMysql.getConnection();
-			st = db.prepareStatement("SELECT contenu, date, userLogin FROM message WHERE forum = ?;");
-			st.setString(1, titre);
-			rs = st.executeQuery();
-			while(rs.next()) {
-				contenu += "<dt> By "+rs.getString(3) +" on "+ rs.getTimestamp(2) +"</dt>";
-				contenu += "<dd>"+rs.getString(1)+"</dd>";
-			}
-		}catch(Exception e) {
-			System.out.println(e);
+		for (int index = 0; index < this.messages.size(); index++) {
+			contenu += "<dt> By "+messages.get(index).getOwner().getLastName() +" "+ messages.get(index).getOwner().getFirstName()+" on "+ messages.get(index).getDatePub() +"</dt>";
+			contenu += "<dd>"+messages.get(index).getContenu()+"</dd>";
 		}
-		try {
-			st.close();
-		} catch (SQLException e) {
-			System.out.println(e);
-		}
-		
 		contenu += "</dl>";
 		return contenu;
 	}
 	
+	/*
 	public static Forum ajouterForum(String titre, String description, Utilisateur createur) {
 		
 		Forum f = null;
@@ -202,7 +251,7 @@ public class Forum extends ActiveRecordBase {
 		return f;
 	}
 	*/
-	/*
+    /*
 	public static String listerForums() {
 		String contenu= "<dl>";
 		
@@ -211,13 +260,13 @@ public class Forum extends ActiveRecordBase {
 		try {
 		
 			Connection db = JDBCMysql.getConnection();
-			st = db.prepareStatement("SELECT titre, description, createur FROM forum;");
+			st = db.prepareStatement("SELECT f.id, f.titre,f. description, u.firstname, u.lastname FROM forum f, utilisateur u where f.createur=u.id;");
 		
 			rs = st.executeQuery();
 			while(rs.next()) {
-				contenu += "<a href=\"/Forum/AfficherForum?name="+rs.getString(1)+"\"> ";
-				contenu += "<dt>"+rs.getString(1) +" by "+ rs.getString(3) +"</dt></a>";
-				contenu += "<dd>"+rs.getString(2)+"</dd>";
+				contenu += "<a href=\"AfficherForum?forum="+rs.getString(1)+"\"> ";
+				contenu += "<dt>"+rs.getString(2) +" by "+ rs.getString(4) +" "+rs.getString(5)+"</dt></a>";
+				contenu += "<dd>"+rs.getString(3)+"</dd>";
 			}
 		}catch(Exception e) {
 			System.out.println(e);
@@ -230,16 +279,21 @@ public class Forum extends ActiveRecordBase {
 		
 		contenu += "</dl>";
 		return contenu;
-		
 	}
-	
+	*/
+    
+    public String toStringListe() {
+		return "<div> <dt>Forum "+ titre + " (par "+createur.getLastName()+" "+createur.getFirstName()+")</dt><dd>"+description+"</dd></div>";
+
+    }
 	
 	@Override
 	public String toString() {
-		String contenu = "<div style=\"border: 1px solid black\"> <dt><h1>Forum "+ titre + " (par "+createur+")</h1></dt><dd>"+description+"</dd></div>";
+		String contenu = "<div> <dt><h1>Forum "+ titre + " (par "+createur.getLastName()+" "+createur.getFirstName()+")</h1></dt><dd><h3>"+description+"</h3></dd></div>";
 		contenu +="<br>";
+		this.messages = LoadMessages();
 		contenu += afficherMessages();
 		return contenu;
 	}
-	*/
+	
 }
