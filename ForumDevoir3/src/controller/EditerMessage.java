@@ -11,58 +11,67 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-import model.Forum;
+import model.Message;
 import model.Utilisateur;
 
 /**
- * Servlet implementation class AjouterAbonnementForum
+ * Servlet implementation class EditerMessage
  */
-@WebServlet("/AjouterAbonnementForum")
-public class AjouterAbonnementForum extends HttpServlet {
+@WebServlet("/EditerMessage")
+public class EditerMessage extends HttpServlet {
 	private static final long serialVersionUID = 1L;
        
     /**
      * @see HttpServlet#HttpServlet()
      */
-    public AjouterAbonnementForum() {
+    public EditerMessage() {
         super();
+        // TODO Auto-generated constructor stub
     }
 
 	/**
 	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
 	 */
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		doPost(request,response);
+		
+		doPost(request, response);
 	}
 
 	/**
 	 * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse response)
 	 */
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		
 		RequestDispatcher rd=null;
+		rd = request.getRequestDispatcher("/afficherForum.jsp");
 		response.setContentType("text/html");  
-		HttpSession session = request.getSession();
-		String forum = request.getParameter("forum");
-		if(forum == null || forum == "") {
-			rd = request.getRequestDispatcher("Deconnexion");
-			rd.forward(request, response);
-		}
-		
-		int forumId = Integer.parseInt(forum);
+		String message = request.getParameter("messageId");
+		String contenu = request.getParameter("contenu");
+		if(message != null && message != "" && contenu != null && contenu != "") {
+			int messageId = Integer.parseInt(message);
+			System.out.println(messageId);
+			Message m = Message.FindbyId(messageId);
+			if(m == null) {
+				System.out.println("couldn't find it");
+				rd.forward(request, response);
+				return;
+			}
+			m.setContenu(contenu);
+			java.util.Date utilDate = new java.util.Date();
+			m.setDatePub(new java.sql.Date(utilDate.getTime()));
+			try {
+				m.save();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
 
-		try {
-			((Utilisateur)session.getAttribute("utilisateur")).addForumSubscription(forumId);
-		} catch (Exception e) {
-			e.printStackTrace();
+			try {
+				
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
 		}
-		
-		if(!"admin".equalsIgnoreCase((String) session.getAttribute("role"))) {
-			rd = request.getRequestDispatcher("/menuUtilisateur.jsp");
-			rd.forward(request, response);
-		} else {
-			rd = request.getRequestDispatcher("/menuAdmin.jsp");
-			rd.forward(request, response);
-		}
+		rd.forward(request, response);
 	}
 
 }

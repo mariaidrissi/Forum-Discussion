@@ -31,12 +31,8 @@
 
 <div style=" height:100%; width:50%; position:fixed;top:2%;right:2%;overflow-y:scroll;">
 <div>
-<h3>Forums auxquels vous etes abonne : </h3>
-<%= ((Utilisateur)session.getAttribute("utilisateur")).listerForumToString() %>
-</div>
-<div>
-<h3>S'abonner a d'autres forums : </h3>
-<%= ((Utilisateur)session.getAttribute("utilisateur")).listerForumsNonAbonne() %>
+<h3>Gerez vos forums : </h3>
+<%= ((Utilisateur)session.getAttribute("utilisateur")).getForumsByAdmin() %>
 </div>
 </div>
 

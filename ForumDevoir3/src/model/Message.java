@@ -35,7 +35,7 @@ public class Message extends ActiveRecordBase {
 
 		this.id = res.getInt("id");
         this.datePub = res.getDate("datePub");
-        this.owner = new Utilisateur(res.getInt("createur"));
+        this.owner = new Utilisateur(res.getInt("owner"));
         this.contenu = res.getString("contenu");
         this.forumPub = new Forum(res.getInt("forumPub"));
         _builtFromDB = true; 
@@ -131,13 +131,15 @@ public class Message extends ActiveRecordBase {
     
     public static Message FindbyId(int id){
     	Connection conn = JDBCMysql.getConnection();
-        String select_query = "select * from `message` where `id` = '" + id + "';";
+        String select_query = "select id, contenu, owner, datePub, forumPub from message where id = '" + id + "';";
         Statement sql = null;
         Message m = null;
         try {
         	sql = conn.createStatement();
             ResultSet res = sql.executeQuery(select_query);
-            m = new Message(res);
+            if(res.next())
+            	m = new Message(res);
+            else m = null;
         } catch (Exception e) {
         	e.printStackTrace();
         }

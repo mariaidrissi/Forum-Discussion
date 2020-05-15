@@ -23,91 +23,6 @@ public class Utilisateur extends ActiveRecordBase {
     private static String _query = "select * from utilisateur"; // for findAll static Method
     private ArrayList<Forum> forumSubscriptions;
 
-	/*
-	public static Utilisateur find(String login, String password) {
-	
-		Utilisateur u = null;
-		ResultSet rs = null;
-		PreparedStatement st = null;
-		try {
-		
-			Connection db = JDBCMysql.getConnection();
-			st = db.prepareStatement("SELECT login,password,admin FROM utilisateurs WHERE login=? AND password=?");
-		
-			st.setString(1, login);
-			st.setString(2, password);
-			rs = st.executeQuery();
-			if(rs.next()) {
-				u = new Utilisateur();
-				u.setLogin(login);
-				u.setMdp(password);
-				u.setAdmin(rs.getBoolean(3));
-			}
-		}catch(Exception e) {
-			System.out.println(e);
-		}
-		try {
-			st.close();
-		} catch (SQLException e) {
-			System.out.println(e);
-		}
-		
-		return u;
-	}
-	
-	public static Utilisateur ajouterUtilisateur(String login, String password, Boolean admin) {
-		Utilisateur u = null;
-		PreparedStatement st = null;
-		try {
-		
-			Connection db = JDBCMysql.getConnection();
-			st = db.prepareStatement("INSERT INTO utilisateurs (login,password,admin) VALUES (?,?,?);");
-		
-			st.setString(1, login);
-			st.setString(2, password);
-			st.setBoolean(3, admin);
-			int i = st.executeUpdate();
-			if(i > 0) {
-				u = new Utilisateur();
-				u.setLogin(login);
-				u.setMdp(password);
-				u.setAdmin(admin);
-			}
-		}catch(Exception e) {
-			System.out.println(e);
-		}
-		try {
-			st.close();
-		} catch (SQLException e) {
-			System.out.println(e);
-		}
-		return u;
-	}
-
-	public String getLogin() {
-		return login;
-	}
-
-	public void setLogin(String login) {
-		this.login = login;
-	}
-
-	public String getMdp() {
-		return mdp;
-	}
-
-	public void setMdp(String mdp) {
-		this.mdp = mdp;
-	}
-
-	public Boolean getAdmin() {
-		return admin;
-	}
-
-	public void setAdmin(Boolean admin) {
-		this.admin = admin;
-	}
-	*/
 	 public ArrayList<Forum> getForumSubscriptions() {
 	        return forumSubscriptions;
 	    }
@@ -117,6 +32,7 @@ public class Utilisateur extends ActiveRecordBase {
 	    };
 
 	    public Utilisateur() {
+	    	this.forumSubscriptions = new ArrayList<Forum>();
 	        _builtFromDB = false;
 	    }
 
@@ -127,6 +43,7 @@ public class Utilisateur extends ActiveRecordBase {
 	        this.login = login;
 	        this.gender = gender;
 	        this.pwd = pwd;
+	        this.forumSubscriptions = new ArrayList<Forum>();
 	        _builtFromDB = false;
 	    }
 
@@ -251,7 +168,7 @@ public class Utilisateur extends ActiveRecordBase {
 	                + " pwd=" + pwd + '}';
 	    }
 
-	//methodes pour implémenter Active record
+	    //methodes pour implémenter Active record
 	    @Override
 	    protected String _update() {
 	        return "UPDATE `utilisateur` SET `firstname` = '" + firstName + "', `lastname` = '" + lastName + "',"
@@ -335,7 +252,6 @@ public class Utilisateur extends ActiveRecordBase {
 	        return contenu;
 	    }
 	    
-	    
 	    public static Utilisateur FindByLastAndFirstName(String fname, String lname) throws IOException, ClassNotFoundException, SQLException {
 	        Connection conn = JDBCMysql.getConnection();
 	        String select_query = "select * from `utilisateur` where `firstname` = ? and `lastname` = ? ;";
@@ -350,7 +266,7 @@ public class Utilisateur extends ActiveRecordBase {
 	        }
 	        return null;
 	    }
-
+	    
 	    public ArrayList<Forum> LoadForumSubscriptions() {
 	    	ArrayList<Forum> forumSubs = new ArrayList<Forum>();
 
@@ -409,6 +325,43 @@ public class Utilisateur extends ActiveRecordBase {
 			}
 	    }
 	    
+	    public String getForumsByAdmin() {
+	    	String contenu = "<ul>";
+	    	ArrayList<Forum> forums = findForumCree();
+	    	for (int index = 0; index < forums.size(); index++) {
+	            contenu += "<li>";
+	            contenu += forums.get(index).toStringListe();
+	            contenu += "<form action='SupprimerForum' method='post'><input type='hidden' name='forum' value='"+forums.get(index).getId()+"'><input type='submit' value='Supprimer'></form>";
+	            contenu += "<form action='AfficherForum' method='post'><input type='hidden' name='forum' value='"+forums.get(index).getId()+"'><input type='submit' value='Acceder au forum'></form>";
+	            contenu += "</li>";
+	        }
+	    	contenu += "</ul>";
+	    	return contenu;
+	    }
+	    
+	    public ArrayList<Forum> findForumCree() {
+	    	ArrayList<Forum> forumCree = new ArrayList<Forum>();
+	    	
+	    	ResultSet rs = null;
+			PreparedStatement st = null;
+			try {
+				Connection db = JDBCMysql.getConnection();
+				st = db.prepareStatement("SELECT id, titre, description, createur FROM forum WHERE createur=?;");
+				st.setInt(1, this.id);
+				rs = st.executeQuery();
+				while(rs.next()) {
+					forumCree.add(new Forum(rs));
+				}
+			}catch(Exception e) {
+				System.out.println(e);
+			}
+			try {
+				st.close();
+			} catch (SQLException e) {
+				System.out.println(e);
+			}
+			return forumCree;
+	    }
 
 	    public String listerForumToString() {
 	    	String contenu="";
@@ -420,6 +373,10 @@ public class Utilisateur extends ActiveRecordBase {
 	    		contenu += "<form action='AfficherForum' method='post'>";
 	    		contenu += "<input type='hidden' name='forum' value='"+forumSubscriptions.get(index).getId()+"'>";
 	    		contenu += "<input type='submit' value='Acceder au forum'>";
+	    		contenu += "</form>";
+	    		contenu += "<form action='SupprimerAbonnementForum' method='post'>";
+	    		contenu += "<input type='hidden' name='forum' value='"+forumSubscriptions.get(index).getId()+"'>";
+	    		contenu += "<input type='submit' value='Se desabonner'>";
 	    		contenu += "</form></li>";
 	    	}
 	    	contenu += "</ul>";
@@ -433,7 +390,7 @@ public class Utilisateur extends ActiveRecordBase {
 			PreparedStatement st = null;
 			try {
 				Connection db = JDBCMysql.getConnection();
-				st = db.prepareStatement("SELECT f.id, f.titre, f.description, u.firstname, u.lastname FROM forum f LEFT JOIN subscriptions s ON f.id=s.id_forum, utilisateur u WHERE (s.id_user <> ? OR s.id_user IS NULL) and u.id=f.createur ;");
+				st = db.prepareStatement("select f.id, f.titre, f.description, u.firstname, u.lastname from forum f, utilisateur u where u.id=f.createur and f.id NOT IN (select id_forum from subscriptions where id_user=?);");
 				st.setInt(1, this.id);
 				rs = st.executeQuery();
 				contenu += "<ul>";

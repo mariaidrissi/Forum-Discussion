@@ -1,7 +1,6 @@
 package controller;
 
 import java.io.IOException;
-import java.sql.SQLException;
 
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
@@ -11,20 +10,19 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-import model.Forum;
 import model.Utilisateur;
 
 /**
- * Servlet implementation class AfficherForum
+ * Servlet implementation class SupprimerAbonnementForum
  */
-@WebServlet("/AfficherForum")
-public class AfficherForum extends HttpServlet {
+@WebServlet("/SupprimerAbonnementForum")
+public class SupprimerAbonnementForum extends HttpServlet {
 	private static final long serialVersionUID = 1L;
        
     /**
      * @see HttpServlet#HttpServlet()
      */
-    public AfficherForum() {
+    public SupprimerAbonnementForum() {
         super();
     }
 
@@ -32,42 +30,39 @@ public class AfficherForum extends HttpServlet {
 	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
 	 */
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		RequestDispatcher rd=request.getRequestDispatcher("/afficherForum.jsp");;
-		rd.forward(request, response);
+		
+		doPost(request, response);
 	}
 
 	/**
 	 * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse response)
 	 */
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		
 		RequestDispatcher rd=null;
 		response.setContentType("text/html");  
 		HttpSession session = request.getSession();
 		String forum = request.getParameter("forum");
-		
 		if(forum == null || forum == "") {
 			rd = request.getRequestDispatcher("Deconnexion");
 			rd.forward(request, response);
 		}
 		
 		int forumId = Integer.parseInt(forum);
-		Forum f;
+
 		try {
-			f = new Forum(forumId);
-			session.setAttribute("forum", f);
-			session.setAttribute("option", "all");
-			session.setAttribute("arg1", null);
-			session.setAttribute("arg2", null);
-			rd = request.getRequestDispatcher("/afficherForum.jsp");
+			((Utilisateur)session.getAttribute("utilisateur")).deleteForumSubscription(forumId);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+		if(!"admin".equalsIgnoreCase((String) session.getAttribute("role"))) {
+			rd = request.getRequestDispatcher("/menuUtilisateur.jsp");
 			rd.forward(request, response);
-		} catch (ClassNotFoundException | SQLException | IOException e) {
-			if(!"admin".equalsIgnoreCase((String) session.getAttribute("role"))) {
-				rd = request.getRequestDispatcher("/menuUtilisateur.jsp");
-				rd.forward(request, response);
-			} else {
-				rd = request.getRequestDispatcher("/menuAdmin.jsp");
-				rd.forward(request, response);
-			}
+		} else {
+			rd = request.getRequestDispatcher("/menuAdmin.jsp");
+			rd.forward(request, response);
 		}
 	}
+
 }

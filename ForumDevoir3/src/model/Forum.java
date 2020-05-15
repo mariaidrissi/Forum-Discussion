@@ -4,6 +4,7 @@ import model.Message;
 import java.io.IOException;
 import java.io.Serializable;
 import java.sql.Connection;
+import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -34,14 +35,29 @@ public class Forum extends ActiveRecordBase {
     public Forum(ResultSet rs) {
     	this._builtFromDB = true;
     	try {
-			this.titre = rs.getString(1);
-	        this.description = rs.getString(2);
-	        this.createur = Utilisateur.FindByID(rs.getInt(3));
+    		this.id = rs.getInt(1);
+			this.titre = rs.getString(2);
+	        this.description = rs.getString(3);
+	        this.createur = Utilisateur.FindByID(rs.getInt(4));
     	} catch (SQLException e) {
 			e.printStackTrace();
 		}
     }
 
+    public Forum(int id) throws SQLException, IOException, ClassNotFoundException {
+        Connection conn = JDBCMysql.getConnection();
+        String select_query = "select * from `forum` where `id` = '" + id + "';";
+        Statement sql = null;
+        sql = conn.createStatement();
+        ResultSet res = sql.executeQuery(select_query);
+        if (res.next()) {
+            this.id = res.getInt("id");
+            this.titre = res.getString(2);
+            this.createur = new Utilisateur(res.getInt(3));
+            this.description = res.getString(4);
+            _builtFromDB = true;
+        }
+    }
 	
 	public ArrayList<Message> getMessages() {
 	    return messages;
@@ -74,30 +90,17 @@ public class Forum extends ActiveRecordBase {
 	public void setCreateur(Utilisateur createur) {
 		this.createur = createur;
 	}
-	
-	public Forum(int id) throws SQLException, IOException, ClassNotFoundException {
-        Connection conn = JDBCMysql.getConnection();
-        String select_query = "select * from `forum` where `id` = '" + id + "';";
-        Statement sql = null;
-        sql = conn.createStatement();
-        ResultSet res = sql.executeQuery(select_query);
-        if (res.next()) {
-            this.id = res.getInt("id");
-            this.titre = res.getString(2);
-            this.createur = new Utilisateur(res.getInt(3));
-            this.description = res.getString(4);
-            _builtFromDB = true;
-        }
-    }
 
-	public ArrayList<Message> getFilDiscussion(String choix) {
+	public ArrayList<Message> getFilDiscussion(String choix, String argument, Date argument2) {
         if ("all".equalsIgnoreCase(choix)) {
             return this.messages;
+        } else if ("nom".equalsIgnoreCase(choix)) {
+        	return findMessagesByNom(argument);
+        } else if ("date".equalsIgnoreCase(choix)) {
+        	return findMessagesByDate(argument2);
         }
-        //ToDo il faut traiter d'autres choix.
         return null;
     }
-
 
 	@Override
     protected String _delete() {
@@ -124,11 +127,11 @@ public class Forum extends ActiveRecordBase {
 		try {
 		
 			Connection db = JDBCMysql.getConnection();
-			st = db.prepareStatement("SELECT contenu, datePub, owner FROM message WHERE forumPub = ?;");
+			st = db.prepareStatement("SELECT id, contenu, datePub, owner, forumPub FROM message WHERE forumPub = ?;");
 			st.setInt(1, id);
 			rs = st.executeQuery();
 			while(rs.next()) {
-				messages.add(new Message(rs.getString(1), Utilisateur.FindByID(rs.getInt(3)), rs.getDate(2),this));
+				messages.add(new Message(rs));
 			}
 		}catch(Exception e) {
 			System.out.println(e);
@@ -153,7 +156,6 @@ public class Forum extends ActiveRecordBase {
 		}
     }
     
-    
     public static ArrayList<Forum> FindAll() {
     	ArrayList<Forum> forums = new ArrayList<Forum>();
     	
@@ -167,7 +169,6 @@ public class Forum extends ActiveRecordBase {
 			rs = st.executeQuery();
 			while(rs.next()) {
 				forums.add(new Forum(rs));
-				
 			}
 		}catch(Exception e) {
 			System.out.println(e);
@@ -179,94 +180,20 @@ public class Forum extends ActiveRecordBase {
 		}
 		return forums;
     }
-
-	
-	/*
-	public static Forum findForum(String name) {
-		
-		Forum f = null;
+    
+    public ArrayList<Message> findMessagesByNom(String nom) {
+    	ArrayList<Message> messages = new ArrayList<Message>();
+    	
 		ResultSet rs = null;
 		PreparedStatement st = null;
 		try {
 			Connection db = JDBCMysql.getConnection();
-			st = db.prepareStatement("SELECT titre, description, createur FROM forum WHERE titre = ?;");
-		
-			st.setString(1, name);
-			rs = st.executeQuery();
-			if(rs.next()) {
-				f = new Forum();
-				f.setTitre(rs.getString(1));
-				f.setDescription(rs.getString(2));
-				f.setCreateur(rs.getString(3));
-			}
-		}catch(Exception e) {
-			System.out.println(e.getStackTrace());
-		}
-		try {
-			st.close();
-		} catch (SQLException e) {
-			System.out.println(e);
-		}
-		return f;
-	}
-	*/
-	public String afficherMessages() {
-		String contenu= "<dl>";
-		for (int index = 0; index < this.messages.size(); index++) {
-			contenu += "<dt> By "+messages.get(index).getOwner().getLastName() +" "+ messages.get(index).getOwner().getFirstName()+" on "+ messages.get(index).getDatePub() +"</dt>";
-			contenu += "<dd>"+messages.get(index).getContenu()+"</dd>";
-		}
-		contenu += "</dl>";
-		return contenu;
-	}
-	
-	/*
-	public static Forum ajouterForum(String titre, String description, Utilisateur createur) {
-		
-		Forum f = null;
-		PreparedStatement st = null;
-		try {
-			
-			Connection db = JDBCMysql.getConnection();
-			st = db.prepareStatement("INSERT INTO forum (titre,description,createur) VALUES (?,?,?);");
-		
-			st.setString(1, titre);
-			st.setString(2, description);
-			st.setString(3, createur.getLogin());
-			int i = st.executeUpdate();
-			if(i > 0) {
-				f = new Forum();
-				f.setTitre(titre);
-				f.setDescription(description);
-				f.setCreateur(createur.getLogin());
-			}
-		}catch(Exception e) {
-			System.out.println(e);
-		}
-		try {
-			st.close();
-		} catch (SQLException e) {
-			System.out.println(e);
-		}
-		return f;
-	}
-	*/
-    /*
-	public static String listerForums() {
-		String contenu= "<dl>";
-		
-		ResultSet rs = null;
-		PreparedStatement st = null;
-		try {
-		
-			Connection db = JDBCMysql.getConnection();
-			st = db.prepareStatement("SELECT f.id, f.titre,f. description, u.firstname, u.lastname FROM forum f, utilisateur u where f.createur=u.id;");
-		
+			st = db.prepareStatement("SELECT m.id, m.contenu, m.owner, m.datePub, m.forumPub FROM message m, utilisateur u WHERE  u.id=m.owner and u.lastname=? and m.forumPub=?;");
+			st.setString(1, nom);
+			st.setInt(2, this.id);
 			rs = st.executeQuery();
 			while(rs.next()) {
-				contenu += "<a href=\"AfficherForum?forum="+rs.getString(1)+"\"> ";
-				contenu += "<dt>"+rs.getString(2) +" by "+ rs.getString(4) +" "+rs.getString(5)+"</dt></a>";
-				contenu += "<dd>"+rs.getString(3)+"</dd>";
+				messages.add(new Message(rs));
 			}
 		}catch(Exception e) {
 			System.out.println(e);
@@ -276,23 +203,74 @@ public class Forum extends ActiveRecordBase {
 		} catch (SQLException e) {
 			System.out.println(e);
 		}
-		
-		contenu += "</dl>";
+		return messages;
+    }
+    
+    public ArrayList<Message> findMessagesByDate(Date date) {
+    	ArrayList<Message> messages = new ArrayList<Message>();
+    	
+		ResultSet rs = null;
+		PreparedStatement st = null;
+		try {
+			Connection db = JDBCMysql.getConnection();
+			st = db.prepareStatement("SELECT id, contenu, owner, datePub, forumPub FROM message WHERE datePub=? and forumPub=?;");
+			st.setDate(1, date);
+			st.setInt(2, this.id);
+			rs = st.executeQuery();
+			while(rs.next()) {
+				messages.add(new Message(rs));
+			}
+		}catch(Exception e) {
+			System.out.println(e);
+		}
+		try {
+			st.close();
+		} catch (SQLException e) {
+			System.out.println(e);
+		}
+		return messages;
+    }
+    
+	public String afficherMessages(ArrayList<Message> messagesFil, int idU) {
+		String contenu= "<dl><ul>";
+		for (int index = 0; index <messagesFil.size(); index++) {
+			contenu += "<li>";
+			contenu += "<dt> By "+messagesFil.get(index).getOwner().getLastName() +" "+ messagesFil.get(index).getOwner().getFirstName()+" on "+ messagesFil.get(index).getDatePub() +"</dt>";
+			contenu += "<dd>"+messagesFil.get(index).getContenu()+"</dd>";
+			if(messagesFil.get(index).getOwner().getId() == idU)
+				contenu += "<button onclick=\"editerMessage('"+messagesFil.get(index).getId()+"')\">Editer</button>";
+			contenu += "</li>";
+		}
+		contenu += "</ul></dl>";
 		return contenu;
 	}
-	*/
-    
+	
+	public static void supprimerForum(int idF) {
+	    	
+	    	try {
+	    		Forum f = new Forum(idF);
+		    	ArrayList<Message> m = f.LoadMessages();
+		    	
+		    	for (int index = 0; index < m.size(); index++) {
+					m.get(index).delete();
+		        }
+		    	f.delete();
+	    	} catch (Exception e) {
+				e.printStackTrace();
+			}
+	    }
+	
     public String toStringListe() {
 		return "<div> <dt>Forum "+ titre + " (par "+createur.getLastName()+" "+createur.getFirstName()+")</dt><dd>"+description+"</dd></div>";
 
     }
-	
-	@Override
-	public String toString() {
+
+	public String afficherForum(int idU, String option, String nom, Date date) {
 		String contenu = "<div> <dt><h1>Forum "+ titre + " (par "+createur.getLastName()+" "+createur.getFirstName()+")</h1></dt><dd><h3>"+description+"</h3></dd></div>";
 		contenu +="<br>";
 		this.messages = LoadMessages();
-		contenu += afficherMessages();
+		ArrayList<Message> messagesFil = getFilDiscussion(option,null,null);
+		contenu += afficherMessages(messagesFil, idU);
 		return contenu;
 	}
 	
