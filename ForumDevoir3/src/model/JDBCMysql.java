@@ -8,6 +8,12 @@ public class JDBCMysql {
 	static Connection db = null;
 	static DatabaseMetaData dbmd;
 
+	/**
+	 * Constructeur pour la connexion à la base de données.
+	 * @throws ClassNotFoundException
+	 * @throws SQLException
+	 * @throws java.io.IOException
+	 */
 	public JDBCMysql() throws ClassNotFoundException, SQLException, java.io.IOException{
 		String database = "//localhost:3306/forum";
 		String username = "root";
@@ -16,8 +22,12 @@ public class JDBCMysql {
 		db = DriverManager.getConnection("jdbc:mysql:"+database+"?serverTimezone=" + TimeZone.getDefault().getID(), username, password);
 	}
 	
+	/**
+	 * Méthode qui permet de récupérer la connexion à la base de données. C'est un singleton
+	 * donc on utilise la même connexion pour toutes les requêtes.
+	 * @return Connection
+	 */
 	public static Connection getConnection(){
-
 		if(db==null) {
 			try {
 				new JDBCMysql();

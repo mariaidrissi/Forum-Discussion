@@ -50,22 +50,28 @@ public class EcrireMessage extends HttpServlet {
 		PrintWriter out = response.getWriter();
 		HttpSession session = request.getSession();
 		
-		Timestamp ts = new Timestamp(System.currentTimeMillis());
+		//si aucun utilisateur n'est connecté
+		if (session.getAttribute("login") == null) {
+	           rd=request.getRequestDispatcher("Deconnexion");
+	           rd.forward(request, response);
+	           return;
+	    }
+		
 		String contenu = request.getParameter("contenu");
 		Forum f = (Forum)session.getAttribute("forum");
 		if(contenu.isEmpty()) {
 			rd.include(request, response);
-			out.println("<p style=\"color:red\">Message ne peut pas etre vide.</p>");
+			out.println("<p style=\"color:red\">Message ne peut pas être vide.</p>");
 			return;
 		}
 		
 		try {
 			f.addMessage(contenu, (Utilisateur)session.getAttribute("utilisateur"));
-			rd.forward(request, response);
-			out.println("<p style=\"green\">Message envoye.</p>");
+			rd.include(request, response);
+			out.println("<p style=\"green\">Message envoyé !</p>");
 		} catch (Exception e) {
 			rd.include(request, response);
-			out.println("<p style=\"color:red\">Message n'a pas pu etre poste.</p>");
+			out.println("<p style=\"color:red\">Message n'a pas pu être posté.</p>");
 		}
 	}
 }

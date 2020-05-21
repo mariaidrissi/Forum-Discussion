@@ -27,7 +27,6 @@ public class SupprimerForum extends HttpServlet {
      */
     public SupprimerForum() {
         super();
-        // TODO Auto-generated constructor stub
     }
 
 	/**
@@ -43,29 +42,35 @@ public class SupprimerForum extends HttpServlet {
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 
 		RequestDispatcher rd=null;
-		response.setContentType("text/html");  
+		response.setContentType("text/html"); 
+		PrintWriter out = response.getWriter();
+		rd = request.getRequestDispatcher("/gererForum.jsp"); //est forcément un admin pour supprimer un forum, test en dessous
 		HttpSession session = request.getSession();
+		
+		//si aucun utilisateur n'est connecté ou que ce n'est pas un administrateur
+		if (session.getAttribute("login") == null || !"admin".equalsIgnoreCase((String) session.getAttribute("role"))) {
+	           rd=request.getRequestDispatcher("Deconnexion");
+	           rd.forward(request, response);
+	           return;
+	    }
+		
 		String forum = request.getParameter("forum");
-		if(forum == null || forum == "") {
-			rd = request.getRequestDispatcher("Deconnexion");
-			rd.forward(request, response);
+		if(forum == null || forum == "") { //si on ne connaît pas le forum
+			rd.include(request, response);
+			out.println("<p style=\"color:red\">Forum doit être renseigné.</p>");
+			return;
 		}
 		
 		int forumId = Integer.parseInt(forum);
 
 		try {
 			Forum.supprimerForum(forumId);
+			rd.include(request, response);
+			out.println("<p style=\"color:green\">Forum supprimé !</p>");
 		} catch (Exception e) {
 			e.printStackTrace();
-		}
-		
-		if(!"admin".equalsIgnoreCase((String) session.getAttribute("role"))) {
-			rd = request.getRequestDispatcher("/menuUtilisateur.jsp");
-			rd.forward(request, response);
-		} else {
-			rd = request.getRequestDispatcher("/menuAdmin.jsp");
-			rd.forward(request, response);
+			rd.include(request, response);
+			out.println("<p style=\"color:green\">Le forum n'a pas pu être supprimé.</p>");
 		}
 	}
-
 }

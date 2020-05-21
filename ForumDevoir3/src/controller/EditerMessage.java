@@ -1,6 +1,7 @@
 package controller;
 
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.sql.SQLException;
 
 import javax.servlet.RequestDispatcher;
@@ -26,7 +27,6 @@ public class EditerMessage extends HttpServlet {
      */
     public EditerMessage() {
         super();
-        // TODO Auto-generated constructor stub
     }
 
 	/**
@@ -44,34 +44,44 @@ public class EditerMessage extends HttpServlet {
 		
 		RequestDispatcher rd=null;
 		rd = request.getRequestDispatcher("/afficherForum.jsp");
+		PrintWriter out = response.getWriter();
 		response.setContentType("text/html");  
+		HttpSession session = request.getSession();
+		
+		//si aucun utilisateur n'est connecté
+		if (session.getAttribute("login") == null) {
+	           rd=request.getRequestDispatcher("Deconnexion");
+	           rd.forward(request, response);
+	           return;
+	    }
+		
 		String message = request.getParameter("messageId");
 		String contenu = request.getParameter("contenu");
+		
 		if(message != null && message != "" && contenu != null && contenu != "") {
 			int messageId = Integer.parseInt(message);
-			System.out.println(messageId);
-			Message m = Message.FindbyId(messageId);
+			
+			Message m = Message.FindbyId(messageId); //retrouver le message concerné
 			if(m == null) {
-				System.out.println("couldn't find it");
-				rd.forward(request, response);
-				return;
+				System.out.println("Le message n'existe pas !");
+			} else {
+				m.setContenu(contenu); //mettre à jour le contenu
+				java.util.Date utilDate = new java.util.Date(); 
+				m.setDatePub(new java.sql.Date(utilDate.getTime())); //mettre à jour la date de publication à maintenant
+				try {
+					m.save(); //mettre à jour dans la base de données.
+					rd.forward(request, response);
+				} catch (Exception e) {
+					e.printStackTrace();
+					rd.include(request, response);
+					out.println("<p style=\"color:red\">Message n'a pas pu être édité.</p>");
+				}
 			}
-			m.setContenu(contenu);
-			java.util.Date utilDate = new java.util.Date();
-			m.setDatePub(new java.sql.Date(utilDate.getTime()));
-			try {
-				m.save();
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-
-			try {
-				
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
+		} else {
+			rd.include(request, response);
+			out.println("<p style=\"color:red\">Message ne peut pas être vide.</p>");
+			return;
 		}
-		rd.forward(request, response);
 	}
 
 }

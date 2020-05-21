@@ -37,8 +37,8 @@ public class Connexion extends HttpServlet {
         	String username = request.getParameter("username");
     		String password = request.getParameter("password");
     		
-    		if(username.isEmpty() || password.isEmpty()) {
-    			out.println("<p style='color:red;'>Les champs ne peuvent pas etre vides !</p>");
+    		if(username.isEmpty() || password.isEmpty()) { //si les champs sont vides
+    			out.println("<p style='color:red;'>Les champs ne peuvent pas être vides !</p>");
     			rd = request.getRequestDispatcher("/connexion.html");
     			rd.include(request, response);
     			return;
@@ -46,63 +46,31 @@ public class Connexion extends HttpServlet {
             // Vérifier si le login existe
             Utilisateur u = Utilisateur.FindByloginAndPwd(username, password);
 
-            if (u == null) {
+            if (u == null) { //si l'utilisateur n'existe pas
     			out.println("<p style='color:red;'>Echec : mot de passe ou login incorrect !</p>");
     			rd = request.getRequestDispatcher("/connexion.html");
     			rd.include(request, response);
            
-            } else {
+            } else { //sinon, le connecter
                 HttpSession session = request.getSession();
                 session.setAttribute("utilisateur", u);
                 session.setAttribute("login", u.getLogin());
                 String role = u.getRole();
                 session.setAttribute("role", role);
-                
-                if ("admin".equalsIgnoreCase(role)) {
-                	/*
-                    out.println("<!DOCTYPE html>");
-                    out.println("<html><head><title>Navigation Administrateur</title></head>");
-                    out.println("<body>");
-                    out.println("<div><h1>Bonjour "+session.getAttribute("login")+"</h1>");
-                    out.println("<form action=\"/Forum/Deconnexion\" method=\"get\">");
-                    out.println("<input type=\"submit\" value=\"Se deconnecter\">");
-                    out.println("</form></div>");
-                    out.println("<a href='NouveauUtilisateur.html'>Créer un nouveau utilisateur</a>");
-                    out.println("<a href='UserManager'>Afficher la liste des utilisateurs</a>");
-                    out.println("</body>");
-                    out.println("</html>");
-                    */
-                	rd = request.getRequestDispatcher("/menuAdmin.jsp");
-        			rd.include(request, response);
-        			
-                } else {
-                	/*
-                    out.println("<!DOCTYPE html>");
-                    out.println("<html>");
-                    out.println("<head>");
-                    out.println("<title>Servlet Connexion</title>");
-                    out.println("</head>");
-                    out.println("<body>");
-                    out.println("<h1>Succes : utilisateur non admin </h1>");
-                    out.println("</body>");
-                    out.println("</html>");
-                    */
-                    rd = request.getRequestDispatcher("/menuUtilisateur.jsp");
-        			rd.include(request, response);
-                }
+               
+                rd = request.getRequestDispatcher("/menu.jsp");
+    			rd.include(request, response);
             }
         } catch (ClassNotFoundException | SQLException ex) {
-            Logger.getLogger(Connexion.class.getName()).log(Level.SEVERE, null, ex);
+        	out.println("<p style='color:red;'>Echec.</p>");
+			rd = request.getRequestDispatcher("/connexion.html");
+			rd.include(request, response);
         }
     }
-
-	public String getServletInfo() {
-        return "Short description";
-    }// </editor-fold>
-
+	
     @Override
     public void init() throws ServletException {
-        super.init(); //To change body of generated methods, choose Tools | Templates.
+        super.init();
     }
     
     /**

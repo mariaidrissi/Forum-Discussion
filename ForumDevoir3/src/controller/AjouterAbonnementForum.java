@@ -42,8 +42,15 @@ public class AjouterAbonnementForum extends HttpServlet {
 		RequestDispatcher rd=null;
 		response.setContentType("text/html");  
 		HttpSession session = request.getSession();
+		
+		if (session.getAttribute("login") == null) {
+	           rd=request.getRequestDispatcher("Deconnexion");
+	           rd.forward(request, response);
+	           return;
+	    }
+		
 		String forum = request.getParameter("forum");
-		if(forum == null || forum == "") {
+		if(forum == null || forum == "") { //si on a un problème avec la requête et que le forum n'est pas défini
 			rd = request.getRequestDispatcher("Deconnexion");
 			rd.forward(request, response);
 		}
@@ -56,13 +63,8 @@ public class AjouterAbonnementForum extends HttpServlet {
 			e.printStackTrace();
 		}
 		
-		if(!"admin".equalsIgnoreCase((String) session.getAttribute("role"))) {
-			rd = request.getRequestDispatcher("/menuUtilisateur.jsp");
+		//on redirige automatiquement vers le menu
+			rd = request.getRequestDispatcher("/menu.jsp");
 			rd.forward(request, response);
-		} else {
-			rd = request.getRequestDispatcher("/menuAdmin.jsp");
-			rd.forward(request, response);
-		}
 	}
-
 }

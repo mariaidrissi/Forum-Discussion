@@ -11,3 +11,4 @@ ALTER TABLE `utilisateur` ADD CONSTRAINT `unique_login` UNIQUE(`login`);
 
 insert into utilisateur(lastname,firstname,login,admin,gender,pwd) values ("jolicoeur", "lise", "lise", '1', 'female', "root");
  insert into utilisateur(lastname,firstname,login,admin,gender,pwd) values ("idrissi", "maria", "maria", '0', 'female', "root");
+insert into utilisateur (lastname,firstname,login,admin,gender,pwd) values ("anonymous", "anonymous", "anonymous", 0, "undefined", "");
