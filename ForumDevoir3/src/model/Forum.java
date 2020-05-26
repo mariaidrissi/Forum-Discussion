@@ -329,7 +329,7 @@ public class Forum extends ActiveRecordBase {
 			contenu += "<dt> Par "+messagesFil.get(index).getOwner().getLastName() +" "+ messagesFil.get(index).getOwner().getFirstName()+", le "+ messagesFil.get(index).getDatePub() +"</dt>";
 			contenu += "<dd>"+messagesFil.get(index).getContenu()+"</dd>";
 			if(messagesFil.get(index).getOwner().getId() == idU)
-				contenu += "<button onclick=\"editerMessage('"+messagesFil.get(index).getId()+"')\">Editer</button>";
+				contenu += "<button class='buttonStyle' onclick=\"editerMessage('"+messagesFil.get(index).getId()+"')\">Editer</button>";
 			contenu += "</li>";
 		}
 		contenu += "</ul></dl>";
@@ -387,9 +387,9 @@ public class Forum extends ActiveRecordBase {
             contenu += "<li>";
             contenu += forums.get(index).toStringListe();
             //bouton pour supprimer le forum
-            contenu += "<form action='SupprimerForum' method='post'><input type='hidden' name='forum' value='"+forums.get(index).getId()+"'><input type='submit' value='Supprimer'></form>";
+            contenu += "<form action='SupprimerForum' method='post'><input type='hidden' name='forum' value='"+forums.get(index).getId()+"'><input class='buttonStyle' type='submit' value='Supprimer'></form>";
             //bouton pour afficher les messages du forum
-            contenu += "<form action='AfficherForum' method='post'><input type='hidden' name='forum' value='"+forums.get(index).getId()+"'><input type='submit' value='Accéder au forum'></form>";
+            contenu += "<form action='AfficherForum' method='post'><input type='hidden' name='forum' value='"+forums.get(index).getId()+"'><input class='buttonStyle' type='submit' value='Accéder au forum'></form>";
             contenu += "</li>";
         }
     	contenu += "</ul>";

@@ -54,7 +54,8 @@ public class AfficherForum extends HttpServlet {
 	           return;
 	    }
 		
-		if(session.getAttribute("forum") == null) { //si on accède au forum depuis la page de menu 
+		//si on accède au forum depuis la page de menu 
+		if(session.getAttribute("forum") == null) { 
 			try {
 				//sauvegarder le forum dans la session 
 				String forum = request.getParameter("forum");
@@ -66,6 +67,7 @@ public class AfficherForum extends HttpServlet {
 			}
 		}
 		
+		//bloc pour déterminer le fil de discussion à afficher
 		try {
 			if(request.getParameter("option") == null || request.getParameter("option").equals("all")) {
 				session.setAttribute("option", "all");

@@ -425,34 +425,6 @@ public class Utilisateur extends ActiveRecordBase {
     }
 	    
     /**
-     * Cette méthode est utilisée par {@link #getForumsByAdmin()}. Elle renvoie la liste des forums qui ont été
-     * créés par l'utilisateur courant.
-     * @return ArrayList<Forum>
-     */
-    private ArrayList<Forum> findForumCree() {
-    	ArrayList<Forum> forumCree = new ArrayList<Forum>();
-    	ResultSet rs = null;
-		PreparedStatement st = null;
-		try {
-			Connection db = JDBCMysql.getConnection();
-			st = db.prepareStatement("SELECT id, titre, description, createur FROM forum WHERE createur=?;");
-			st.setInt(1, this.id);
-			rs = st.executeQuery();
-			while(rs.next()) {
-				forumCree.add(new Forum(rs));
-			}
-		}catch(Exception e) {
-			System.out.println(e);
-		}
-		try {
-			st.close();
-		} catch (SQLException e) {
-			System.out.println(e);
-		}
-		return forumCree;
-    }
-
-    /**
      * Cette méthode supprime un utilisateur. Elle commence par récupérer l'utilisateur persistant correspondant à l'id passé en paramètres.
      * Ensuite, elle remplace pour tous les messages venant de cet utilisateur le créateur par un "anonyme" présent dans la base de données.
      * Ensuite, elle supprime tous les abonnements de cet utilisateur.
@@ -508,12 +480,12 @@ public class Utilisateur extends ActiveRecordBase {
     		//bouton pour afficher les messages du forum
     		contenu += "<form action='AfficherForum' method='post'>";
     		contenu += "<input type='hidden' name='forum' value='"+forumSubscriptions.get(index).getId()+"'>";
-    		contenu += "<input type='submit' value='Accéder au forum'>";
+    		contenu += "<input class='buttonStyle' type='submit' value='Accéder au forum'>";
     		contenu += "</form>";
     		//bouton pour se desabonner du forum
     		contenu += "<form action='SupprimerAbonnementForum' method='post'>";
     		contenu += "<input type='hidden' name='forum' value='"+forumSubscriptions.get(index).getId()+"'>";
-    		contenu += "<input type='submit' value='Se désabonner'>";
+    		contenu += "<input class='buttonStyle' type='submit' value='Se désabonner'>";
     		contenu += "</form></li>";
     	}
     	contenu += "</ul>";
@@ -543,7 +515,7 @@ public class Utilisateur extends ActiveRecordBase {
 				//bouton pour s'abonner au forum
 				contenu += "<form action='AjouterAbonnementForum' method='post'>";
 	    		contenu += "<input type='hidden' name='forum' value='"+rs.getInt(1)+"'>";
-	    		contenu += "<input type='submit' value=\"S'abonner\">";
+	    		contenu += "<input class='buttonStyle' type='submit' value=\"S'abonner\">";
 	    		contenu += "</form></li>";
 			}
 			contenu += "</ul>";

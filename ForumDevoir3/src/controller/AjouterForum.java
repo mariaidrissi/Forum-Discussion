@@ -47,6 +47,7 @@ public class AjouterForum extends HttpServlet {
 		PrintWriter out = response.getWriter();
 		HttpSession session = request.getSession();
 		
+		//si l'utilisateur n'est pas un administrateur ou que personne n'est connecté
 		if (session.getAttribute("login") == null || !"admin".equalsIgnoreCase((String) session.getAttribute("role"))) {
 	           rd=request.getRequestDispatcher("Deconnexion");
 	           rd.forward(request, response);
@@ -55,21 +56,21 @@ public class AjouterForum extends HttpServlet {
 		
 		String titre = request.getParameter("titre");
 		String description = request.getParameter("description");
-		if(titre.isEmpty() || description.isEmpty()) { //la description du forum et le titre ne peuvent pas être nuls
+		if(titre.isEmpty() || description.isEmpty()) { //la description du forum et le titre ne peuvent pas être vides
+			out.println("<p class='invalid'>Les champs ne peuvent pas etre vide.</p>");
 			rd.include(request, response);
-			out.println("<p style=\"color:red\">Les champs ne peuvent pas etre vide.</p>");
 			return;
 		}
 
 		try {
-			//on créé le nouveau forum en tant qu'objet (pas encore persistant)
+			//on créé le nouveau forum (pas encore persistant)
 			Forum f = new Forum(titre, description, (Utilisateur)session.getAttribute("utilisateur"));
 			f.save(); //rendre le forum persistant
 			rd.include(request, response);
-			out.println("<p style='color:green;'>Forum cree.</p>");
+			out.println("<p class='valid'>Forum cree.</p>");
 		} catch (ClassNotFoundException | SQLException | IOException e) { //si il y a une erreur on prévient l'utilisateur
+			out.println("<p class='invalid'>Le forum n'a pas pu etre cree.</p>");
 			rd.include(request, response);
-			out.println("<p style='color:red;'>Le forum n'a pas pu etre cree.</p>");
 		}
 	}
 }

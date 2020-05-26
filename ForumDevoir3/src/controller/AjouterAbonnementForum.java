@@ -1,6 +1,7 @@
 package controller;
 
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.sql.SQLException;
 
 import javax.servlet.RequestDispatcher;
@@ -39,8 +40,10 @@ public class AjouterAbonnementForum extends HttpServlet {
 	 * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse response)
 	 */
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		
 		RequestDispatcher rd=null;
 		response.setContentType("text/html");  
+		PrintWriter out = response.getWriter();
 		HttpSession session = request.getSession();
 		
 		if (session.getAttribute("login") == null) {
@@ -56,15 +59,17 @@ public class AjouterAbonnementForum extends HttpServlet {
 		}
 		
 		int forumId = Integer.parseInt(forum);
+		rd = request.getRequestDispatcher("/menu.jsp");
 
 		try {
 			((Utilisateur)session.getAttribute("utilisateur")).addForumSubscription(forumId);
+			rd.forward(request, response);
 		} catch (Exception e) {
 			e.printStackTrace();
+			out.println("<p class='invalid'>Abonnement n'a pas pu être ajouté !</p>");
+			rd.include(request, response);
 		}
 		
-		//on redirige automatiquement vers le menu
-			rd = request.getRequestDispatcher("/menu.jsp");
-			rd.forward(request, response);
+		
 	}
 }

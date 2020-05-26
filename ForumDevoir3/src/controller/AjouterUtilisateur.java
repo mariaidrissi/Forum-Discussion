@@ -42,7 +42,7 @@ public class AjouterUtilisateur extends HttpServlet {
         if (session.getAttribute("login") == null || !"admin".equalsIgnoreCase((String) session.getAttribute("role"))) {
            rd=request.getRequestDispatcher("Deconnexion");
            rd.forward(request, response);
-        } else  { //sinon on lui sert la page nouvelUtilisateur
+        } else  { //sinon on lui sert la page pour gérer les utilisateurs
         	PrintWriter out = response.getWriter();
     		rd = request.getRequestDispatcher("/gererUtilisateur.jsp");
     		rd.forward(request, response);
@@ -53,7 +53,9 @@ public class AjouterUtilisateur extends HttpServlet {
 	 * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse response)
 	 */
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		
 		RequestDispatcher rd=null;
+		rd = request.getRequestDispatcher("/gererUtilisateur.jsp");
 		response.setContentType("text/html");  
 		PrintWriter out = response.getWriter();
 		HttpSession session = request.getSession();
@@ -65,8 +67,6 @@ public class AjouterUtilisateur extends HttpServlet {
 		       return;
 		 } 
 		
-		rd = request.getRequestDispatcher("/gererUtilisateur.jsp");
-		
 		//récupérer les paramètres du nouvel utilisateur
 		 String firstName = request.getParameter("User first name");
 		 String lastName = request.getParameter("User familly name");
@@ -75,27 +75,29 @@ public class AjouterUtilisateur extends HttpServlet {
 		 String password = request.getParameter("User password");
 		 
 		 if (firstName == null || lastName == null || mail == null || password == null) { //les champs n'existent pas
-		     out.println("<p style='color:red;'>Les champs ne peuvent pas être vides !</p>");
+		     out.println("<p class='invalid'>Les champs ne peuvent pas être vides !</p>");
 		     rd.include(request, response);
 		
 		 } else if ("".equals(firstName) || "".equals(lastName) || "".equals(mail) || "".equals(password)) { //les champs sont vides
-		 	out.println("<p style='color:red;'>Les champs ne peuvent pas être vides !</p>");
-		         rd.include(request, response);
+		 	out.println("<p class='invalid'>Les champs ne peuvent pas être vides !</p>");
+		 	rd.include(request, response);
 	     }
 
 		try {
 			//créé l'utilisateur (pas encore persistant)
 		    Utilisateur user = new Utilisateur(lastName, firstName, mail, gender, password);
-		    if (request.getParameter("role") != null) {
-		    	user.setRole(request.getParameter("role"));
-			}
+		    String [] admin;
+		    admin = request.getParameterValues("admin");
+		    if (admin != null) {
+		    	user.setRole(admin[0]);
+			} 
 			user.save(); //rendre l'utilisateur persistant
+			out.println("<p class='valid'>Utilisateur ajouté !</p>");
 			rd.include(request, response);
-			out.println("<p style='color:green;'>Utilisateur ajouté !</p>");
 		} catch (Exception e) {
+			System.out.println(e);
+			out.println("<p class='invalid'>Utilisateur n'a pas pu être ajouté !</p>");
 			rd.include(request, response);
-			out.println("<p style='color:red;'>Utilisateur n'a pas pu être ajouté !</p>");
-		
 		}
 	}
 }

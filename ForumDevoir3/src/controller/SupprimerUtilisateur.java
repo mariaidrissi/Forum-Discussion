@@ -51,24 +51,28 @@ public class SupprimerUtilisateur extends HttpServlet {
 	           rd.forward(request, response);
 	           return;
 	    } 
-		
-		String idU = request.getParameter("idU");
-		
-		if(idU == null || idU == "") { //si on ne connaît pas l'utilisateur à supprimer
-			out.println("<p style='color:red;'>Le champ ne peut pas être vide !</p>");
-            rd.include(request, response);
-		}
-		
-		int idUtil = Integer.parseInt(idU);
-
 		try {
+			String idU = request.getParameter("idU");
+			
+			if(idU == null || idU == "") { //si on ne connaît pas l'utilisateur à supprimer
+				out.println("<p class='invalid'>Le champ ne peut pas être vide !</p>");
+	            rd.include(request, response);
+			}
+			
+			int idUtil = Integer.parseInt(idU);
+
 			Utilisateur.supprimerUtilisateur(idUtil);
-			rd.include(request, response);
-			out.println("<p style='color:green;'>Utilisateur supprimé !</p>");
+			if(idUtil != ((Utilisateur)session.getAttribute("utilisateur")).getId()) {
+				out.println("<p class='valid'>Utilisateur supprimé !</p>");
+				rd.include(request, response);
+			} else {
+				rd = request.getRequestDispatcher("Deconnexion");
+				rd.forward(request, response);
+			}
 		} catch (Exception e) {
-			e.printStackTrace();
+			System.out.println(e);
+			out.println("<p class='invalid'>Utilisateur n'a pas pu être supprimé !</p>");
 			rd.include(request, response);
-			out.println("<p style='color:red;'>Utilisateur n'a pas pu être supprimé !</p>");
 		}
 	}
 

@@ -22,7 +22,7 @@ public class Deconnexion extends HttpServlet {
 	            throws ServletException, IOException {
 	        response.setContentType("text/html;charset=UTF-8");
 	        HttpSession session = request.getSession();
-	        session.invalidate();
+	        session.invalidate(); //fermer la session
 	        try (PrintWriter out = response.getWriter()) {
 	            out.println("<!DOCTYPE html>");
 	            out.println("<html>");

@@ -65,7 +65,7 @@ public class EditerMessage extends HttpServlet {
 			if(m == null) {
 				System.out.println("Le message n'existe pas !");
 			} else {
-				m.setContenu(contenu); //mettre à jour le contenu
+				m.setContenu(contenu + " (édité)"); //mettre à jour le contenu
 				java.util.Date utilDate = new java.util.Date(); 
 				m.setDatePub(new java.sql.Date(utilDate.getTime())); //mettre à jour la date de publication à maintenant
 				try {
@@ -73,13 +73,13 @@ public class EditerMessage extends HttpServlet {
 					rd.forward(request, response);
 				} catch (Exception e) {
 					e.printStackTrace();
+					out.println("<p class='invalid'>Message n'a pas pu être édité.</p>");
 					rd.include(request, response);
-					out.println("<p style=\"color:red\">Message n'a pas pu être édité.</p>");
 				}
 			}
 		} else {
+			out.println("<p class='invalid'>Message ne peut pas être vide.</p>");
 			rd.include(request, response);
-			out.println("<p style=\"color:red\">Message ne peut pas être vide.</p>");
 			return;
 		}
 	}

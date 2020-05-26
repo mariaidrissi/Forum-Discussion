@@ -38,7 +38,7 @@ public class Connexion extends HttpServlet {
     		String password = request.getParameter("password");
     		
     		if(username.isEmpty() || password.isEmpty()) { //si les champs sont vides
-    			out.println("<p style='color:red;'>Les champs ne peuvent pas être vides !</p>");
+    			out.println("<p class='invalid'>Les champs ne peuvent pas être vides !</p>");
     			rd = request.getRequestDispatcher("/connexion.html");
     			rd.include(request, response);
     			return;
@@ -47,22 +47,22 @@ public class Connexion extends HttpServlet {
             Utilisateur u = Utilisateur.FindByloginAndPwd(username, password);
 
             if (u == null) { //si l'utilisateur n'existe pas
-    			out.println("<p style='color:red;'>Echec : mot de passe ou login incorrect !</p>");
+    			out.println("<p class='invalid'>Echec : mot de passe ou login incorrect !</p>");
     			rd = request.getRequestDispatcher("/connexion.html");
     			rd.include(request, response);
            
             } else { //sinon, le connecter
                 HttpSession session = request.getSession();
+                //stocker dans la session les informations dont on va avoir besoin
                 session.setAttribute("utilisateur", u);
                 session.setAttribute("login", u.getLogin());
-                String role = u.getRole();
-                session.setAttribute("role", role);
+                session.setAttribute("role", u.getRole());
                
                 rd = request.getRequestDispatcher("/menu.jsp");
     			rd.include(request, response);
             }
         } catch (ClassNotFoundException | SQLException ex) {
-        	out.println("<p style='color:red;'>Echec.</p>");
+        	out.println("<p class='invalid'>Echec.</p>");
 			rd = request.getRequestDispatcher("/connexion.html");
 			rd.include(request, response);
         }

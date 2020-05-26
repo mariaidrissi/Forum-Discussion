@@ -60,18 +60,17 @@ public class EcrireMessage extends HttpServlet {
 		String contenu = request.getParameter("contenu");
 		Forum f = (Forum)session.getAttribute("forum");
 		if(contenu.isEmpty()) {
+			out.println("<p class='invalid'>Message ne peut pas être vide.</p>");
 			rd.include(request, response);
-			out.println("<p style=\"color:red\">Message ne peut pas être vide.</p>");
 			return;
 		}
 		
 		try {
 			f.addMessage(contenu, (Utilisateur)session.getAttribute("utilisateur"));
 			rd.include(request, response);
-			out.println("<p style=\"green\">Message envoyé !</p>");
 		} catch (Exception e) {
+			out.println("<p class='invalid'>Message n'a pas pu être posté.</p>");
 			rd.include(request, response);
-			out.println("<p style=\"color:red\">Message n'a pas pu être posté.</p>");
 		}
 	}
 }

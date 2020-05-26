@@ -56,8 +56,8 @@ public class SupprimerForum extends HttpServlet {
 		
 		String forum = request.getParameter("forum");
 		if(forum == null || forum == "") { //si on ne connaît pas le forum
+			out.println("<p class='invalid'>Forum doit être renseigné.</p>");
 			rd.include(request, response);
-			out.println("<p style=\"color:red\">Forum doit être renseigné.</p>");
 			return;
 		}
 		
@@ -65,12 +65,12 @@ public class SupprimerForum extends HttpServlet {
 
 		try {
 			Forum.supprimerForum(forumId);
+			out.println("<p class='valid'>Forum supprimé !</p>");
 			rd.include(request, response);
-			out.println("<p style=\"color:green\">Forum supprimé !</p>");
 		} catch (Exception e) {
 			e.printStackTrace();
+			out.println("<p class='invalid'>Le forum n'a pas pu être supprimé.</p>");
 			rd.include(request, response);
-			out.println("<p style=\"color:green\">Le forum n'a pas pu être supprimé.</p>");
 		}
 	}
 }
