@@ -323,16 +323,22 @@ public class Forum extends ActiveRecordBase {
      * @return String
      */
 	public String afficherMessages(ArrayList<Message> messagesFil, int idU) {
-		String contenu= "<dl><ul>";
+		String contenu= "<dl>";
+		int compt=0;
 		for (int index = 0; index <messagesFil.size(); index++) {
-			contenu += "<li>";
-			contenu += "<dt> Par "+messagesFil.get(index).getOwner().getLastName() +" "+ messagesFil.get(index).getOwner().getFirstName()+", le "+ messagesFil.get(index).getDatePub() +"</dt>";
-			contenu += "<dd>"+messagesFil.get(index).getContenu()+"</dd>";
+			if(compt%2==0) {
+				contenu += "<div class='container'>";
+			} else {
+				contenu += "<div class='container darker'>";
+			}
+			contenu += "<p class='infoM'> Par "+messagesFil.get(index).getOwner().getLastName() +" "+ messagesFil.get(index).getOwner().getFirstName()+", le "+ messagesFil.get(index).getDatePub() +"</p>";
+			contenu += "<p>"+messagesFil.get(index).getContenu()+"</p>";
 			if(messagesFil.get(index).getOwner().getId() == idU)
 				contenu += "<button class='buttonStyle' onclick=\"editerMessage('"+messagesFil.get(index).getId()+"')\">Editer</button>";
-			contenu += "</li>";
+			contenu += "</div>";
+			compt++;
 		}
-		contenu += "</ul></dl>";
+		contenu += "</dl>";
 		return contenu;
 	}
 	

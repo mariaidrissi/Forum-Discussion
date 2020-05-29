@@ -25,10 +25,10 @@
 		<form style="margin-top:1%;margin-bottom:1%;display:inline-block;" action="GererForums" method="get">
 			<input class="buttonStyle" type="submit" value="Gérer les forums">
 		</form>
-		<form action="Deconnexion" method="get" style="display:inline-block;float:right;">
-			<input class="buttonDeconnexion" type="submit" value="Se déconnecter">
-		</form>
 	</c:if>
+	<form action="Deconnexion" method="get" style="display:inline-block;">
+			<input class="buttonDeconnexion" type="submit" value="Se déconnecter">
+	</form>
 </nav>
 </header>
 

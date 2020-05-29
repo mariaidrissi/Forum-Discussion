@@ -84,8 +84,8 @@
 #upleft { width:20%; float:left; border-right:1px solid black; padding:2%; background-color:#E3E3E3;} 
 #upright { float:left; height:100%; padding:2%; background-color:#F2F2F2;} 
 
-#upleftmenu {width:50%;float:left; border-right:1px solid black; padding:2%;}
-#uprightmenu {width:40%;float:left; padding:2%;} 
+#upleftmenu {width:60%;float:left; border-right:1px solid black; padding:2%;}
+#uprightmenu {width:30%;float:left; padding:2%;} 
 
 .break { clear:both; }
 footer { width:100%; text-align:center; border-top:1px solid black; bottom:0px;background-color : #40E0D0; }
@@ -100,3 +100,21 @@ html {
 	background-color:#F2F2F2;
 	height:100%;
 }
+
+.container {
+	border: 2px solid #dedede;
+	background-color:#f1f1f1;
+	border-radius:5px;
+	padding:10px;
+}
+
+.darker {
+	border-color:#ccc;
+	background-color:#ddd;
+}
+
+.infoM {
+	float:right;
+	color:#aaa;
+}
+

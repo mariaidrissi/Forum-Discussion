@@ -33,7 +33,7 @@
 		<div id="editer" style="display:none;border:1px solid black;">
 			<form action="EditerMessage" method="post" id="editerM">
 				<input type="hidden" name="messageId" id="idM">
-				<label> Réecrivez votre message : </label> <textarea rows="10" cols="40" name="contenu" form="editerM" required></textarea> <br>
+				<label> Réecrivez votre message : </label> <textarea rows="5" cols="60" name="contenu" form="editerM" required></textarea> <br>
 				<input class="buttonOk" type="submit" value="Editer">
 			</form>
 			<button class="buttonDeconnexion" onclick="editerMessage(0)">Fermer</button>
@@ -45,7 +45,7 @@
 		<div id="ecrire" style="border:1px solid black; display:none;">
 			<form action="EcrireMessage" method="post" id="addM">
 				<label> Ecrivez votre message : </label> 
-				<textarea rows="10" cols="30" name="contenu" form="addM" required></textarea> <br>
+				<textarea rows="5" cols="60" name="contenu" form="addM" required></textarea> <br>
 				<input class="buttonOk" type="submit" value="Envoyer">
 			</form>
 			<button class="buttonDeconnexion" onclick="ecrireMessage()">Fermer</button>
