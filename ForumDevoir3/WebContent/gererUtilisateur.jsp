@@ -67,7 +67,7 @@
 <div class="break"></div>
 <footer >
 <p>SR03 application forum 2020</p>
-<p>Lise Jolicoeur<p>
+<p>Lise Jolicoeur & Maria Idrissi<p>
 </footer>
 	</body>
 </html>

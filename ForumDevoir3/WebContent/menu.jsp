@@ -13,7 +13,7 @@
 <body>
 
 <header>
-<h1 style="text-align:center;">Bonjour <%= session.getAttribute("login") %></h1>
+<h1>Bonjour <%= session.getAttribute("login") %></h1>
 
 <nav class="menu">
 	<c:set var="role" value='<%=(String)session.getAttribute("role") %>'/>
@@ -54,7 +54,7 @@
 <div class="break"></div>
 <footer >
 <p>SR03 application forum 2020</p>
-<p>Lise Jolicoeur<p>
+<p>Lise Jolicoeur & Maria Idrissi<p>
 </footer>
 </body>
 </html>
