@@ -12,35 +12,49 @@
 </head>
 <body>
 
-<div>
-	<div style="display: ruby-base;">
-		<h1>Bonjour <%= session.getAttribute("login") %></h1>
-		<form action="Deconnexion" method="get">
-			<input class="buttonDeconnexion" type="submit" value="Se déconnecter">
-		</form>
-	</div>
-	<div>
-		
+<header>
+<h1 style="text-align:center;">Bonjour <%= session.getAttribute("login") %></h1>
+
+<nav class="menu">
 	<c:set var="role" value='<%=(String)session.getAttribute("role") %>'/>
 	<c:if test="${role eq 'Admin'}">
-		<form style="margin-top:1%;margin-bottom:1%;" action="AjouterUtilisateur" method="get">
+		<form style="margin-top:1%;margin-bottom:1%;display:inline-block;" action="AjouterUtilisateur" method="get">
 			<input class="buttonStyle" type="submit" value="Gérer les utilisateurs">
 		</form>
-		<form style="margin-top:1%;margin-bottom:1%;" action="GererForums" method="get">
+
+		<form style="margin-top:1%;margin-bottom:1%;display:inline-block;" action="GererForums" method="get">
 			<input class="buttonStyle" type="submit" value="Gérer les forums">
 		</form>
+		<form action="Deconnexion" method="get" style="display:inline-block;float:right;">
+			<input class="buttonDeconnexion" type="submit" value="Se déconnecter">
+		</form>
 	</c:if>
-	<div style="width:100%; margin-top:2%; overflow:auto;">
-		<div style="width:60%;height:100%; float:left; left:2%;">
-			<h3>Forums auxquels vous êtes abonnés : </h3>
+</nav>
+</header>
+
+<div class="row">
+	<aside id="upleft">
+		<h3>Informations :</h3>
+		<p>Nom : <%=session.getAttribute("nom")%> <%=session.getAttribute("prenom")%> </p>
+		<p>Gender : <%= session.getAttribute("gender")%></p>
+	</aside>
+	<main id="upright">
+		<h3>Forums : </h3>
+		<div style="height:100%; float:left;padding:10px;">
+			<h3>Forums auxquels vous êtes abonnés </h3>
 			<%= ((Utilisateur)session.getAttribute("utilisateur")).listerForumsAbonne() %>
 		</div>
-		<div style="height:100%; width:40%; float:right; right:2%;">
-			<h3>S'abonner à d'autres forums : </h3>
+		<div style="height:100%; float:right; padding:10px;">
+			<h3>S'abonner à d'autres forums </h3>
 			<%= ((Utilisateur)session.getAttribute("utilisateur")).listerForumsNonAbonne() %>
 		</div>
-		</div>
-	</div>
+	</main>
 </div>
+
+<div class="break"></div>
+<footer >
+<p>SR03 application forum 2020</p>
+<p>Lise Jolicoeur<p>
+</footer>
 </body>
 </html>

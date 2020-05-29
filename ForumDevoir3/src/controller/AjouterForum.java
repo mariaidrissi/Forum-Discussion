@@ -66,8 +66,8 @@ public class AjouterForum extends HttpServlet {
 			//on créé le nouveau forum (pas encore persistant)
 			Forum f = new Forum(titre, description, (Utilisateur)session.getAttribute("utilisateur"));
 			f.save(); //rendre le forum persistant
-			rd.include(request, response);
 			out.println("<p class='valid'>Forum cree.</p>");
+			rd.include(request, response);
 		} catch (ClassNotFoundException | SQLException | IOException e) { //si il y a une erreur on prévient l'utilisateur
 			out.println("<p class='invalid'>Le forum n'a pas pu etre cree.</p>");
 			rd.include(request, response);

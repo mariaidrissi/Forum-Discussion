@@ -57,6 +57,9 @@ public class Connexion extends HttpServlet {
                 session.setAttribute("utilisateur", u);
                 session.setAttribute("login", u.getLogin());
                 session.setAttribute("role", u.getRole());
+                session.setAttribute("nom", u.getLastName());
+                session.setAttribute("prenom", u.getFirstName());
+                session.setAttribute("gender", u.getGender());
                
                 rd = request.getRequestDispatcher("/menu.jsp");
     			rd.include(request, response);

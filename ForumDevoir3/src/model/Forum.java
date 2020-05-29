@@ -415,12 +415,20 @@ public class Forum extends ActiveRecordBase {
      * @return String
      */
 	public String afficherForum(int idU, String option, String nom, Date date) {
-		String contenu = "<div> <dt><h1>Forum "+ titre + " (par "+createur.getLastName()+" "+createur.getFirstName()+")</h1></dt><dd><h3>"+description+"</h3></dd></div>";
+		String contenu = "";
 		contenu +="<br>";
 		LoadMessages();
 		ArrayList<Message> messagesFil = getFilDiscussion(option,nom,date);
 		contenu += afficherMessages(messagesFil, idU);
 		return contenu;
+	}
+	
+	/**
+	 * Affiche le forum en tant que titre.
+	 * @return String
+	 */
+	public String afficherForumTitre() {
+		return "<div> <dt><h1>Forum "+ titre + " (par "+createur.getLastName()+" "+createur.getFirstName()+")</h1></dt><dd><h3>"+description+"</h3></dd></div>";
 	}
 	
 }
